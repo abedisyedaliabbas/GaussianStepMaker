@@ -33,3 +33,7 @@ Run in your terminal (edit the `CONFIG` section inside the script):
 ```bash
 git clone https://github.com/abedisyedaliabbas/GaussianStepMaker.git
 python GaussianStepMaker.py
+
+
+build a standalone app (Windows)
+python -m PyInstaller --onefile --windowed --name GaussianStepMaker GaussianStepMaker_GUI.py
