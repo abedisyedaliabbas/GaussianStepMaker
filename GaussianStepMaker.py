@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-One-step OR Full-steps Gaussian generator (flex geometry + CM override).
 
 Modes
 -----
