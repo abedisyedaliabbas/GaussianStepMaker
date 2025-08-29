@@ -31,4 +31,5 @@ Supports:
 Run in your terminal (edit the `CONFIG` section inside the script):
 
 ```bash
+git clone https://github.com/abedisyedaliabbas/GaussianStepMaker.git
 python GaussianStepMaker.py
