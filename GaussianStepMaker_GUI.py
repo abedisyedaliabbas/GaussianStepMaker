@@ -4,6 +4,7 @@
 Gaussian Step Maker — GUI
 - Generate SINGLE step or FULL (1–7) with flexible geometry handling
 - Inline vs linked (%%oldchk + geom=check) control for full mode
+- Charge/Multiplicity override
 - Vacuum or SCRF (SMD/PCM/IEFPCM/CPCM)
 - Scheduler script: PBS / SLURM / local
 """
@@ -78,12 +79,12 @@ def cm_override(parsed_cm: str, charge, mult) -> str:
 
 def make_com_inline(job: str, nproc: int, mem: str, route: str, title: str, cm: str, coords: List[str]) -> List[str]:
     return [f"%nprocshared={nproc}", f"%mem={mem}", f"%chk={job}.chk",
-            route, "", title, "", cm, *coords]
+            route, "", title, "", cm, *coords, "", ""]
 
 def make_com_linked(job: str, nproc: int, mem: str, oldchk: str, route: str, title: str, cm: str) -> List[str]:
     # linked uses oldchk + geom=check; only include charge/mult line
     return [f"%nprocshared={nproc}", f"%mem={mem}", f"%oldchk={oldchk}", f"%chk={job}.chk",
-            route, "", title, "", cm]
+            route, "", title, "", cm, "", ""]
 
 def pbs_script(job: str, queue: str, nproc: int, mem: str, wall: str, proj: str, gauss_bin: str) -> List[str]:
     return [
