@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+One-step OR Full-steps Gaussian generator (flex geometry + CM override).
 
 Modes
 -----
@@ -130,12 +132,12 @@ def cm_override(parsed_cm: str) -> str:
 
 def make_com_inline(job: str, nproc: int, mem: str, route: str, title: str, cm: str, coords: List[str]) -> List[str]:
     return [f"%nprocshared={nproc}", f"%mem={mem}", f"%chk={job}.chk",
-            route, "", title, "", cm, *coords]
+            route, "", title, "", cm, *coords, "", ""]
 
 def make_com_linked(job: str, nproc: int, mem: str, oldchk: str, route: str, title: str, cm: str) -> List[str]:
     # linked uses oldchk + geom=check; only include charge/mult line
     return [f"%nprocshared={nproc}", f"%mem={mem}", f"%oldchk={oldchk}", f"%chk={job}.chk",
-            route, "", title, "", cm]
+            route, "", title, "", cm, "", ""]
 
 def pbs_script(job: str) -> List[str]:
     return [
