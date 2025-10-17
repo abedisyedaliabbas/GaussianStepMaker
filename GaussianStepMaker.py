@@ -1,31 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-One-step OR Full-steps Gaussian generator (flex geometry + CM override).
+Syed Ali Abbas Abedi
+
+One-step OR Full-steps Gaussian generator 
 
 Modes
 -----
 MODE = "single" -> generate one step (STEP = 1..7)
 MODE = "full"   -> generate all steps 1..7 in one folder
 
-Geometry in FULL mode
----------------------
-- By default we *link* geometry using %oldchk + geom=check:
-    2–3 read 01, 4 reads 01, 5–7 read 04
-- You can force *inline* coordinates for any subset of steps via INLINE_STEPS.
-- When a step is forced inline, the coordinates will be copied from:
-    - Steps 2–4: always from Step 1 (the input .com geometry)
-    - Steps 5–7: from INLINE_SOURCE_5TO7 (1 or 4). If you set 4, we don’t
-      know 04 geometry yet (it’s produced by Step 4), so we inline the input
-      coords as a placeholder (still valid to start SCF).
-
 File names
 ----------
 <STEP><BASENAME>_<FUNCTIONAL>_<BASIS>_<solvtag>.com/.sh
 
-Charge & multiplicity
----------------------
-Set CHARGE and MULT to ints to override the values parsed from the .com.
 """
 
 from __future__ import annotations
@@ -62,7 +50,9 @@ ACCOUNT     = ""                # SLURM -A
 
 # FULL mode geometry control
 # Steps you want to embed inline coords for (others will be linked):
-INLINE_STEPS = []               # e.g., [2,4,7]  (empty = link all)
+INLINE_STEPS = []               # user selection (e.g., [4]); ignored for steps not allowed
+# Only these steps may ever be inlined in FULL mode:
+INLINE_ALLOWED = {1, 4}         # Step 1 is always inline; Step 4 optionally inline
 # For steps 5–7, when you inline, choose the source step's geometry (1 or 4):
 INLINE_SOURCE_5TO7 = 4          # 1 = input .com; 4 = “after step 4” (uses input coords as placeholder)
 
@@ -169,7 +159,7 @@ def slurm_script(job: str) -> List[str]:
 def local_script(job: str) -> List[str]:
     return ["#!/bin/bash", f"g16 < {job}.com > {job}.log &"]
 
-def write_sh(job: str):
+def write_sh(job: str) -> List[str]:
     if SCHEDULER == "pbs":   return pbs_script(job)
     if SCHEDULER == "slurm": return slurm_script(job)
     return local_script(job)
@@ -223,14 +213,16 @@ def generate_full(base: str, cm_in: str, coords_in: List[str], out_path: Path, s
 
     # Helpers to decide inline/linked and which coords to use when inlining
     def inline_for(step: int) -> bool:
-        return step in INLINE_STEPS
+        # Step 1 is always inline; Step 4 optionally inline via INLINE_STEPS.
+        if step == 1:
+            return True
+        return (step in INLINE_ALLOWED) and (step in INLINE_STEPS)
 
     def coords_for(step: int) -> Tuple[str, List[str]]:
         # 2–4 get Step1 geometry if inlined
         if step in (2,3,4):
             return cm_use, coords_in
-        # 5–7 get geometry from INLINE_SOURCE_5TO7 (1 or 4); we only *have* input coords now,
-        # so we inline those as a valid starting structure.
+        # 5–7 get geometry from INLINE_SOURCE_5TO7 (we inline input coords as starter)
         if step in (5,6,7):
             return cm_use, coords_in
         return cm_use, coords_in
